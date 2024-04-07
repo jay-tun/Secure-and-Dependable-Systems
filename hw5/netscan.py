@@ -4,9 +4,8 @@ from scapy.all import *
 def icmp_scan(ip_prefix):
     ans, unans = sr(IP(dst=ip_prefix)/ICMP(), timeout=2, verbose=False)
     print(f"Received {len(ans) + len(unans)} packets, got {len(ans)} answers, remaining {len(unans)} packets")
-    print("IP Address\tICMP Type\tICMP Code\tStatus")
     for send, recv in ans:
-        print(f"{recv[IP].src}\t\t{recv[ICMP].type}\t\t{recv[ICMP].code}\t\t(alive)")
+        print(f"{recv[IP].src}\t{recv[ICMP].type}\t{recv[ICMP].code}\t(alive)")
 
 if __name__ == "__main__":
     import sys
