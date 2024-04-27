@@ -1,0 +1,69 @@
+\documentclass{article}
+\usepackage{graphicx} % Required for inserting images
+\usepackage{minted}
+\title{HW4}
+\author{Aung Kyaw Tun }
+\date{April 2024}
+
+
+\begin{document}
+
+\maketitle
+
+\section{Problem 4.1}
+
+a)  There's a potential security vulnerability in this code due to the use of \texttt{strcat()}. If the total length of command-line argument exceeds 256 characters, it could result in a buffer overflow, causing undefined behavior. For example the command below would achieve buffer overflow
+
+\begin{verbatim}
+    ./wordcount `perl -e 'print "A" x 300'`
+\end{verbatim}
+Also since the program uses user input to construct a command, and due to lack of sanitization and proper validation, it's susceptible to malicious code injection. For example
+
+\begin{verbatim}
+    ./wordcount arg1; rm -rf /
+\end{verbatim}
+could potentially lead to deletion of important files, or users can inject malicious files or code in its stead. 
+Since the program also uses \texttt{system()}, it's vulnerable to arbitrary code execution leading to unauthorized access or system compromise. \\
+
+b) The following program calls the existing program wc correctly with the use of \texttt{unistd.h} file.
+\begin{minted}{c}
+#include <stdio.h>
+#include <unistd.h>
+
+int main(int argc, char *argv[]) {
+    char *args[argc + 1];
+    args[0] = "wc";  
+
+    for (int i = 1; i < argc; i++) {
+        args[i] = argv[i];
+    }
+    args[argc] = NULL;  
+
+    execvp("wc", args);
+
+    perror("execvp");
+    return 1;
+}
+
+
+\end{minted}
+
+\section{Problem 4.2}
+
+Macro \texttt{-D\_FORTIFY\_SOURCE=2}, specific to \texttt{gcc}, enables additional security checks at compile time to detect some buffer overflow errors when using various string and memory manipulation functions like \texttt{strcpy, memcpy, strcat, memsets, gets}, etc. When enabled, it performs additional checks for buffer overflows and other vulnerabilities by fortifying certain standard library functions.\\ 
+
+\texttt{-fsanitize=safe-stack}, used with \texttt{clang}, enables the SafeStack feature, designed to protect against stack based buffer overflows. It works by separating the program stack into two parts, safe stack and unsafe stack. Safe stack stores return address, register spills, and local variables that are always accessed in a safe manner and unsafe stack stores everything else. This ensures that buffer overflow on the unsafe stack cannot overwrite anything on the safe stack.
+
+\section{Problem 4.3}
+a) Jane Doe can remove her name from the Exams table by entering the following code:
+\begin{verbatim}
+    '; DELETE FROM Exams WHERE StudentName='Jane Doe' --
+\end{verbatim}
+
+b) Jane can delete the entire table by the following code injection:
+
+\begin{verbatim}
+    '; DROP TABLE Exams --
+\end{verbatim}
+
+\end{document}
